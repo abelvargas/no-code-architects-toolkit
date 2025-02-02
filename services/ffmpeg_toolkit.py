@@ -47,22 +47,40 @@ def process_video_combination(media_urls, job_id, webhook_url=None):
             input_filename = download_file(url, os.path.join(STORAGE_PATH, f"{job_id}_input_{i}"))
             input_files.append(input_filename)
 
+        # Re-mux input files to ensure proper MOOV atom placement
+        fixed_input_files = []
+        for file in input_files:
+            fixed_file = file + "_fixed.mp4"
+            try:
+                (
+                    ffmpeg
+                    .input(file)
+                    .output(fixed_file, c='copy', movflags='faststart')
+                    .overwrite_output()
+                    .run(capture_stdout=True, capture_stderr=True)
+                )
+                fixed_input_files.append(fixed_file)
+                os.remove(file)  # Remove the original file after successful re-muxing
+            except Exception as e:
+                print(f"Failed to fix file {file}: {e}")
+                fixed_input_files.append(file)  # Fallback to original if fix fails
+
         # Generate an absolute path concat list file for FFmpeg
         concat_file_path = os.path.join(STORAGE_PATH, f"{job_id}_concat_list.txt")
         with open(concat_file_path, 'w') as concat_file:
-            for input_file in input_files:
+            for input_file in fixed_input_files:
                 # Write absolute paths to the concat list
                 concat_file.write(f"file '{os.path.abspath(input_file)}'\n")
 
         # Use the concat demuxer to concatenate the videos
         (
-            ffmpeg.input(concat_file_path, format='concat', safe=0).
-                output(output_path, c='copy').
-                run(overwrite_output=True)
+            ffmpeg.input(concat_file_path, format='concat', safe=0)
+            .output(output_path, c='copy')
+            .run(overwrite_output=True)
         )
 
-        # Clean up input files
-        for f in input_files:
+        # Clean up fixed input files
+        for f in fixed_input_files:
             os.remove(f)
             
         os.remove(concat_file_path)  # Remove the concat list file after the operation
