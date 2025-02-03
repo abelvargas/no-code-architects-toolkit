@@ -11,6 +11,7 @@ GCP_BUCKET_NAME = os.environ.get('GCP_BUCKET_NAME', '')
 
 def validate_env_vars(provider):
     """ Validate the necessary environment variables for the selected storage provider """
+    print(f"DEBUG: validate_env_vars called with provider: {provider}")
     if provider == "GCP":
         if not os.getenv("GCP_BUCKET_NAME"):
             raise ValueError("Missing environment variable: GCP_BUCKET_NAME")
