@@ -16,14 +16,20 @@ S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY', '')
 
 def validate_env_vars(provider):
     """ Validate the necessary environment variables for the selected storage provider """
-    required_vars = {
-        'GCP': ['GCP_BUCKET_NAME', 'GCP_SA_CREDENTIALS'],
-        #'S3': ['S3_ENDPOINT_URL', 'S3_ACCESS_KEY', 'S3_SECRET_KEY']
-    }
-    
-    missing_vars = [var for var in required_vars[provider] if not os.getenv(var)]
-    if missing_vars:
-        raise ValueError(f"Ainda faltando variaveis for {provider} storage: {', '.join(missing_vars)}")
+    if provider == "GCP":
+        if not os.getenv("GCP_BUCKET_NAME"):
+            raise ValueError("Missing environment variable: GCP_BUCKET_NAME")
+        if not os.getenv("GCP_SA_CREDENTIALS"):
+            raise ValueError("Missing environment variable: GCP_SA_CREDENTIALS")
+    elif provider == "S3":
+        if not os.getenv("S3_ENDPOINT_URL"):
+            raise ValueError("Missing environment variable: S3_ENDPOINT_URL")
+        if not os.getenv("S3_ACCESS_KEY"):
+            raise ValueError("Missing environment variable: S3_ACCESS_KEY")
+        if not os.getenv("S3_SECRET_KEY"):
+            raise ValueError("Missing environment variable: S3_SECRET_KEY")
+    else:
+        raise ValueError(f"Unknown storage provider: {provider}")
 
 class CloudStorageProvider:
     """ Abstract CloudStorageProvider class to define the upload_file method """
