@@ -29,6 +29,13 @@ def download_file(url, storage_path="/tmp/"):
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
     
+    downloaded_size = os.path.getsize(local_filename)
+    print(f"Downloaded file {local_filename} size: {downloaded_size} bytes")
+    if "Content-Length" in response.headers:
+        expected_size = int(response.headers["Content-Length"])
+        if downloaded_size != expected_size:
+            print(f"Warning: Downloaded file size ({downloaded_size} bytes) does not match expected size ({expected_size} bytes)")
+
     return local_filename
 
 
