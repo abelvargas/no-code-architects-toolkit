@@ -23,7 +23,7 @@ def validate_env_vars(provider):
     
     missing_vars = [var for var in required_vars[provider] if not os.getenv(var)]
     if missing_vars:
-        raise ValueError(f"Missing environment variables for {provider} storage: {', '.join(missing_vars)}")
+        raise ValueError(f"Ainda faltando variaveis for {provider} storage: {', '.join(missing_vars)}")
 
 class CloudStorageProvider:
     """ Abstract CloudStorageProvider class to define the upload_file method """
