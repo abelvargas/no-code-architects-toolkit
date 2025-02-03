@@ -61,12 +61,17 @@ class S3CompatibleProvider(CloudStorageProvider):
 
 def get_storage_provider() -> CloudStorageProvider:
     """ Get the appropriate storage provider based on the available environment variables """
-    # Use the module-level variables (which default to "" if not set)
+    # Debug prints to show environment variable state
+    print(f"GCP_BUCKET_NAME='{GCP_BUCKET_NAME}', GCP_SA_CREDENTIALS='{GCP_SA_CREDENTIALS}'")
+    print(f"S3_BUCKET_NAME='{S3_BUCKET_NAME}', S3_ENDPOINT_URL='{S3_ENDPOINT_URL}', S3_ACCESS_KEY='{S3_ACCESS_KEY}', S3_SECRET_KEY='{S3_SECRET_KEY}'")
+
     if GCP_BUCKET_NAME and GCP_SA_CREDENTIALS:
         validate_env_vars('GCP')
+        print("Using GCP storage provider")
         return GCPStorageProvider()
     elif S3_BUCKET_NAME and S3_ENDPOINT_URL and S3_ACCESS_KEY and S3_SECRET_KEY:
         validate_env_vars('S3')
+        print("Using S3 storage provider")
         return S3CompatibleProvider()
     else:
         raise ValueError("No valid cloud storage configuration found. Set either GCP or S3 environment variables.")
