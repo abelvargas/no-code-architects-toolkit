@@ -54,6 +54,15 @@ class S3CompatibleProvider(CloudStorageProvider):
 
 def get_storage_provider() -> CloudStorageProvider:
     """ Get the appropriate storage provider based on the available environment variables """
+    use_gcp = all([
+        os.getenv('GCP_BUCKET_NAME'),
+        os.getenv('GCP_SA_CREDENTIALS')
+    ])
+
+    if use_gcp:
+        validate_env_vars('GCP')
+        return GCPStorageProvider()
+
     use_s3 = all([
         os.getenv('S3_BUCKET_NAME'),
         os.getenv('S3_ENDPOINT_URL'),
@@ -64,6 +73,5 @@ def get_storage_provider() -> CloudStorageProvider:
     if use_s3:
         validate_env_vars('S3')
         return S3CompatibleProvider()
-    
-    validate_env_vars('GCP')
-    return GCPStorageProvider()
+
+    raise ValueError("No valid cloud storage configuration found. Set either GCP or S3 environment variables.")
